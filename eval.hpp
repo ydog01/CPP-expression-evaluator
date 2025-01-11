@@ -101,6 +101,8 @@ namespace eval
                         return pos;
                     Lfuncs.pop_back();
                 }
+                else if (str[pos] == ',')
+                    flag = pos + 1;
                 else if(fptr = oper2.first->find(str[pos]))
                 {
                     do
