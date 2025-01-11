@@ -72,7 +72,8 @@ type result(const epre<type>& epre_);<br>
 
 ----------------------------------------------
 
-具体使用例子：<br>
+具体使用例子：
+-------------
 比如需要double实数求值<br>
 初始化分析器<br>
 eval::eval<double> eval_(isdigit_,isdigitin,stod_);<br>
@@ -124,6 +125,6 @@ double stod_(const std::string&s)<br>
     eval_.result(epre);（计算表达式的值，返回结果，失败抛出一个std::runtime_error）<br>
     
 -----------------------------------------------
-更多内容我以后会更新的，敬请期待~<br>
+我以后会更新更多内容的，敬请期待~<br>
 （话说我其实不知道README怎么写来着。。。）
 -----------------------------------------------
