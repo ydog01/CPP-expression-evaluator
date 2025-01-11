@@ -2,6 +2,7 @@
 #define eval_CLASS
 #include"sstree.hpp"
 #include<functional>
+#include<stdexcept>
 #include<vector>
 namespace eval
 {
