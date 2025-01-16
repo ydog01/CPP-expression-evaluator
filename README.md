@@ -115,8 +115,8 @@ double stod_(const std::string&s)<br>
 
 ----------
 添加常变量：<br>
-    eval_.vars.first->insert("PI",{eval::vartype::CONST,M_PI});<br>
-    eval_.vars.first->insert("a",{eval::vartype::FREE,0.0});<br>
+    eval_.vars.first->insert("PI",{eval::vartype::CONSTVAR,M_PI});<br>
+    eval_.vars.first->insert("a",{eval::vartype::FREEVAR,0.0});<br>
 
 -----------
 修改常变量的值：<br>
