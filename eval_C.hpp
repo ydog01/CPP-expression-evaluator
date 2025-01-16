@@ -15,8 +15,8 @@ namespace eval
     };
     enum class vartype
     {
-        CONST,
-        FREE
+        CONSTVAR,
+        FREEVAR
     };
     template <typename type>
     struct var
