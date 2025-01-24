@@ -2,8 +2,8 @@
 #define eval_CLASS
 #include"sstree.hpp"
 #include<functional>
-#include<stdexcept>
 #include<vector>
+#include<memory>
 namespace eval
 {
     template <typename type>
@@ -45,50 +45,38 @@ namespace eval
         std::function<bool(const char&)> constbegin;
         std::function<bool(const char&)> constin;
         std::function<type(const std::string&)> stot;
-        std::pair<sstree<var<type>>*,bool> vars;
-        std::pair<sstree<func<type>>*,bool> funcs;
-        std::pair<sstree<func<type>>*,bool> oper1;
-        std::pair<sstree<func<type>>*,bool> oper2;
+        std::shared_ptr<sstree<var<type>>> vars;
+        std::shared_ptr<sstree<func<type>>> funcs;
+        std::shared_ptr<sstree<func<type>>> oper1;
+        std::shared_ptr<sstree<func<type>>> oper2;
 
         eval(std::function<bool(const char&)> constbegin_,
         std::function<bool(const char&)> constin_,
         std::function<type(const std::string&)> stot_):
-
         constbegin(constbegin_),
         constin(constin_),
         stot(stot_),
-        vars{new sstree<var<type>>,true},
-        funcs{new sstree<func<type>>,true},
-        oper1{new sstree<func<type>>,true}, 
-        oper2{new sstree<func<type>>,true} {}
+        vars(new sstree<var<type>>),
+        funcs(new sstree<func<type>>),
+        oper1(new sstree<func<type>>),
+        oper2(new sstree<func<type>>){}
 
         eval(std::function<bool(const char&)> constbegin_,
             std::function<bool(const char&)> constin_,
             std::function<type(const std::string&)> stot_,
-            sstree<var<type>>* vars_,
-            sstree<func<type>>* funcs_,
-            sstree<func<type>>* oper1_,
-            sstree<func<type>>* oper2_):
-        
+            std::shared_ptr<sstree<var<type>>> vars_,
+            std::shared_ptr<sstree<func<type>>> funcs_,
+            std::shared_ptr<sstree<func<type>>> oper1_,
+            std::shared_ptr<sstree<func<type>>> oper2_):
         constbegin(constbegin_),
         constin(constin_),
         stot(stot_),    
-        vars(vars?std::make_pair(vars_,false):std::make_pair(new sstree<var<type>>,true)),
-        funcs(funcs?std::make_pair(funcs_,false):std::make_pair(new sstree<func<type>>,true)),
-        oper1(oper1?std::make_pair(oper1_,false):std::make_pair(new sstree<func<type>>,true)), 
-        oper2(oper2_?std::make_pair(oper2_,false):std::make_pair(new sstree<func<type>>,true)) {}
-
-        ~eval()
-        {
-            if(vars.second)
-                delete vars.first;
-            if(funcs.second)
-                delete funcs.first;
-            if(oper1.second)
-                delete oper1.first;
-            if(oper2.second)
-                delete oper2.first;
-        }
+        vars(vars_?vars_:new sstree<var<type>>),
+        funcs(funcs_?funcs_:new sstree<func<type>>),
+        oper1(oper1_? oper1_:new sstree<func<type>>), 
+        oper2(oper2_? oper2_:new sstree<func<type>>) {}
+        
+        ~eval()=default;
 
         size_t cpre(epre<type>& epre_,const std::string &str);
         type result(const epre<type>& epre_);
