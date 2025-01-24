@@ -30,11 +30,11 @@ namespace eval
                 else
                 {
                     Lpos = pos;
-                    if (fptr = funcs.first->find(str[pos]))
+                    if (fptr = funcs->find(str[pos]))
                     {
                         do
-                            funcs.first->setptr(fptr);
-                        while (++pos < str.size()&&str[pos]!='('&&(fptr = funcs.first->find(str[pos])));
+                            funcs->setptr(fptr);
+                        while (++pos < str.size()&&str[pos]!='('&&(fptr = funcs->find(str[pos])));
                         if((str[pos]=='(')&&(fptr->data))
                         {
                             Lfuncs.push_back(fptr->data);
@@ -43,43 +43,43 @@ namespace eval
                         }
                         else
                             pos=Lpos;
-                        funcs.first->rebegin();
+                        funcs->rebegin();
                     }
-                    if((pos==Lpos)&&(vptr=vars.first->find(str[pos])))
+                    if((pos==Lpos)&&(vptr=vars->find(str[pos])))
                     {
                         do
-                            vars.first->setptr(vptr);
-                        while(++pos<str.size()&&(vptr=vars.first->find(str[pos])));
-                        if(vars.first->data())
+                            vars->setptr(vptr);
+                        while(++pos<str.size()&&(vptr=vars->find(str[pos])));
+                        if(vars->data())
                         {
-                            if(vars.first->data()->vtype==vartype::CONSTVAR)
+                            if(vars->data()->vtype==vartype::CONSTVAR)
                             {
-                                epre_.consts.push_back(vars.first->data()->value);
+                                epre_.consts.push_back(vars->data()->value);
                                 epre_.index.push_back('c');
                             }
                             else
                             {
-                                epre_.vars.push_back(&(vars.first->data()->value));
+                                epre_.vars.push_back(&(vars->data()->value));
                                 epre_.index.push_back('v');
                             }
                         }
                         else
                             pos=Lpos;
-                        vars.first->rebegin();
+                        vars->rebegin();
                     }
-                    if((pos==Lpos)&&(fptr=oper1.first->find(str[pos])))
+                    if((pos==Lpos)&&(fptr=oper1->find(str[pos])))
                     {
                         do
-                            oper1.first->setptr(fptr);
-                        while (++pos<str.size()&&(fptr=oper1.first->find(str[pos])));
-                        if(oper1.first->data())
+                            oper1->setptr(fptr);
+                        while (++pos<str.size()&&(fptr=oper1->find(str[pos])));
+                        if(oper1->data())
                         {
-                            Lfuncs.push_back(oper1.first->data());
+                            Lfuncs.push_back(oper1->data());
                             flag=pos;
                         }
                         else
                             pos=Lpos;
-                        oper1.first->rebegin();
+                        oper1->rebegin();
                     }
                     if(pos==Lpos)
                         return pos;
@@ -103,25 +103,25 @@ namespace eval
                 }
                 else if (str[pos] == ',')
                     flag = pos + 1;
-                else if (fptr = oper2.first->find(str[pos]))
+                else if (fptr = oper2->find(str[pos]))
                 {
                     do
-                        oper2.first->setptr(fptr);
-                    while (++pos < str.size() && (fptr = oper2.first->find(str[pos])));
-                    if (oper2.first->data())
+                        oper2->setptr(fptr);
+                    while (++pos < str.size() && (fptr = oper2->find(str[pos])));
+                    if (oper2->data())
                     {
-                        while (!Lfuncs.empty() && Lfuncs.back() && (Lfuncs.back()->flag >= oper2.first->data()->flag))
+                        while (!Lfuncs.empty() && Lfuncs.back() && (Lfuncs.back()->flag >= oper2->data()->flag))
                         {
                             epre_.funcs.push_back(Lfuncs.back());
                             epre_.index.push_back('f');
                             Lfuncs.pop_back();
                         }
-                        Lfuncs.push_back(oper2.first->data());
+                        Lfuncs.push_back(oper2->data());
                     }
                     else
                         return pos;
                     flag = pos--;
-                    oper2.first->rebegin();
+                    oper2->rebegin();
                 }
                 else
                     return pos;
