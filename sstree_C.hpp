@@ -32,5 +32,6 @@ public:
     bool insert(const std::string&str,const type&data);
     inline iterator find(const char&ch);
     iterator search(const std::string&str);
+    inline bool erase(const std::string&str);
 };
 #endif
