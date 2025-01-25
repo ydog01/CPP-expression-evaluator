@@ -92,26 +92,43 @@ double stod_(const std::string&s)<br>
 
 ----------
 为eval提供运算:<br>
-我用一些常见的一二元和函数运算举些例子：<br>
-    eval_.oper1.first->insert("-",{1,-1u,[](const double*arr)->double {return -arr[0]; }});<br>
-    eval_.oper1.first->insert("+",{1,-1u,[](const double*arr)->double {return arr[0]; }});<br>
-    eval_.oper2.first->insert("+",{2,0,[](const double*arr)->double {return arr[0]+arr[1]; }});<br>
-    eval_.oper2.first->insert("-",{2,0,[](const double*arr)->double {return arr[0]-arr[1]; }});<br>
-    eval_.oper2.first->insert("*",{2,1,[](const double*arr)->double {return arr[0]*arr[1]; }});<br>
-    eval_.oper2.first->insert("/",{2,1,[](const double*arr)->double {return arr[0]/arr[1]; }});<br>
-    eval_.funcs.first->insert("sin",{1,-1u,[](const double*arr)->double {return sin(arr[0]); }});<br>
-    eval_.funcs.first->insert("cos",{1,-1u,[](const double*arr)->double {return cos(arr[0]); }});<br>
-    eval_.funcs.first->insert("tan",{1,-1u,[](const double*arr)->double {return tan(arr[0]); }});<br>
-    eval_.funcs.first->insert("asin",{1,-1u,[](const double*arr)->double {return asin(arr[0]); }});<br>
-    eval_.funcs.first->insert("acos",{1,-1u,[](const double*arr)->double {return acos(arr[0]); }});<br>
-    eval_.funcs.first->insert("atan",{1,-1u,[](const double*arr)->double {return atan(arr[0]); }});<br>
-    eval_.funcs.first->insert("sqrt",{1,-1u,[](const double*arr)->double {return sqrt(arr[0]); }});<br>
-    eval_.funcs.first->insert("log",{1,-1u,[](const double*arr)->double {return log(arr[0]); }});<br>
-    eval_.funcs.first->insert("log10",{1,-1u,[](const double*arr)->double {return log10(arr[0]); }});<br>
-    eval_.funcs.first->insert("exp",{1,-1u,[](const double*arr)->double {return exp(arr[0]); }});<br>
-    eval_.funcs.first->insert("abs",{1,-1u,[](const double*arr)->double {return abs(arr[0]); }});<br>
-    eval_.funcs.first->insert("floor",{1,-1u,[](const double*arr)->double {return floor(arr[0]); }});<br>
-    eval_.funcs.first->insert("ceil",{1,-1u,[](const double*arr)->double {return ceil(arr[0]); }});<br>
+我用一些常见的一二元和函数运算举些例子：<br>    
+    eval_.oper1->insert("-", {1, -1u, [](const double* arr) -> double
+                                    { return -arr[0]; }});<br>
+    eval_.oper1->insert("+", {1, -1u, [](const double* arr) -> double
+                                    { return arr[0]; }});<br>
+    eval_.oper2->insert("+", {2, 0, [](const double* arr) -> double
+                                    { return arr[0] + arr[1]; }});<br>
+    eval_.oper2->insert("-", {2, 0, [](const double* arr) -> double
+                                    { return arr[0] - arr[1]; }});<br>
+    eval_.oper2->insert("/", {2, 1, [](const double* arr) -> double
+                                    { return arr[0] / arr[1]; }});<br>
+    eval_.funcs->insert("sin", {1, -1u, [](const double* arr) -> double
+                                      { return sin(arr[0]); }});<br>
+    eval_.funcs->insert("cos", {1, -1u, [](const double* arr) -> double
+                                      { return cos(arr[0]); }});<br>
+    eval_.funcs->insert("tan", {1, -1u, [](const double* arr) -> double
+                                      { return tan(arr[0]); }});<br>
+    eval_.funcs->insert("asin", {1, -1u, [](const double* arr) -> double
+                                       { return asin(arr[0]); }});<br>
+    eval_.funcs->insert("acos", {1, -1u, [](const double* arr) -> double
+                                       { return acos(arr[0]); }});<br>
+    eval_.funcs->insert("atan", {1, -1u, [](const double* arr) -> double
+                                       { return atan(arr[0]); }});<br>
+    eval_.funcs->insert("sqrt", {1, -1u, [](const double* arr) -> double
+                                       { return sqrt(arr[0]); }});<br>
+    eval_.funcs->insert("log", {1, -1u, [](const double* arr) -> double
+                                      { return log(arr[0]); }});<br>
+    eval_.funcs->insert("log10", {1, -1u, [](const double* arr) -> double
+                                        { return log10(arr[0]); }});<br>
+    eval_.funcs->insert("exp", {1, -1u, [](const double* arr) -> double
+                                      { return exp(arr[0]); }});<br>
+    eval_.funcs->insert("abs", {1, -1u, [](const double* arr) -> double
+                                      { return abs(arr[0]); }});<br>
+    eval_.funcs->insert("floor", {1, -1u, [](const double* arr) -> double
+                                        { return floor(arr[0]); }});<br>
+    eval_.funcs->insert("ceil", {1, -1u, [](const double *arr) -> double
+                                       { return ceil(arr[0]); }});<br>
 
 ----------
 添加常变量：<br>
