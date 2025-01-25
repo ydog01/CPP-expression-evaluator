@@ -74,4 +74,34 @@ typename sstree<type>::iterator sstree<type>::search(const std::string& str)
     }
     return ptr_l;
 }
+template<typename type>
+inline bool sstree<type>::erase(const std::string& str)
+{   
+    typename std::map<char,tree_in>::iterator ptr_r;
+    iterator ptr_l=ptr,ptr_=ptr;
+    size_t ptrchild=0;
+    for(size_t pos=0;pos<str.size()-1;pos++)
+    {
+        ptr_r=ptr_l->child.find(str[pos]); 
+        if(ptr_r==ptr_l->child.end())
+            return false;
+        ptr_l = &(ptr_r->second);
+        if (ptr_l->child.size() > 1 || ptr_l->data)
+        {
+            ptr_ = ptr_l;
+            ptrchild = pos + 1;
+        }
+    }
+    ptr_r=ptr_l->child.find(str.back()); 
+    if(ptr_r==ptr_l->child.end())
+            return false;
+    if(!ptr_r->second.child.empty())
+    {
+        delete ptr_l->data;
+        ptr_l->data=nullptr;
+    }
+    else
+        ptr_->child.erase(str[ptrchild]);
+    return true;
+}
 #endif
