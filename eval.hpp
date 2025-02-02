@@ -52,16 +52,8 @@ namespace eval
                         while(++pos<str.size()&&(vptr=vars->find(str[pos])));
                         if(vars->data())
                         {
-                            if(vars->data()->vtype==vartype::CONSTVAR)
-                            {
-                                epre_.consts.push_back(vars->data()->value);
-                                epre_.index.push_back('c');
-                            }
-                            else
-                            {
-                                epre_.vars.push_back(&(vars->data()->value));
-                                epre_.index.push_back('v');
-                            }
+                            epre_.vars.push_back(&(vars->data()->value));
+                            epre_.index.push_back('v');
                         }
                         else
                             pos=Lpos;
@@ -102,7 +94,17 @@ namespace eval
                     Lfuncs.pop_back();
                 }
                 else if (str[pos] == ',')
+                {
+                    while (Lfuncs.size() && Lfuncs.back())
+                    {
+                        epre_.funcs.push_back(Lfuncs.back());
+                        epre_.index.push_back('f');
+                        Lfuncs.pop_back();
+                    }
+                    if (Lfuncs.empty())
+                        return pos;
                     flag = pos + 1;
+                }
                 else if (fptr = oper2->find(str[pos]))
                 {
                     do
