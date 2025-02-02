@@ -37,7 +37,7 @@ std::function<type(const type*)> f;<br>
 ----------------------------------------------
 var为常变量基本单元<br>
 有两个成员分别表示属性和值<br>
-vartype vtype;//可以取值eval::vartype::CONST表示常量，eval::vartype::FREE表示变量<br>
+vartype vtype;//可以取值eval::vartype::CONSTVAR表示常量，eval::vartype::FREEVAR表示变量<br>
 type value;
 
 ----------------------------------------------
@@ -73,62 +73,9 @@ type result(const epre<type>& epre_);<br>
 比如需要double实数求值
 
 ------------
-初始化分析器<br>
-eval::eval<double> eval_(isdigit_,isdigitin,stod_);<br>
-其中<br>
-bool isdigit_(const char&ch)<br>
-{<br>
-    return ch>='0'&&ch<='9';<br>
-}<br>
-bool isdigitin(const char&ch)<br>
-{<br>
-    return (ch>='0'&&ch<='9')||ch=='.';<br>
-}<br>
-double stod_(const std::string&s)<br>
-{<br>
-    return std::stod(s);<br>
-}<br>
-（可以稍微理解一下我说的常量判断是指的什么）<br>
-
-----------
-为eval提供运算:<br>
-我用一些常见的一二元和函数运算举些例子：<br>    
-    eval_.oper1->insert("-", {1, -1u, [](const double* arr) -> double
-                                    { return -arr[0]; }});<br>
-    eval_.oper1->insert("+", {1, -1u, [](const double* arr) -> double
-                                    { return arr[0]; }});<br>
-    eval_.oper2->insert("+", {2, 0, [](const double* arr) -> double
-                                    { return arr[0] + arr[1]; }});<br>
-    eval_.oper2->insert("-", {2, 0, [](const double* arr) -> double
-                                    { return arr[0] - arr[1]; }});<br>
-    eval_.oper2->insert("/", {2, 1, [](const double* arr) -> double
-                                    { return arr[0] / arr[1]; }});<br>
-    eval_.funcs->insert("sin", {1, -1u, [](const double* arr) -> double
-                                      { return sin(arr[0]); }});<br>
-    eval_.funcs->insert("cos", {1, -1u, [](const double* arr) -> double
-                                      { return cos(arr[0]); }});<br>
-    eval_.funcs->insert("tan", {1, -1u, [](const double* arr) -> double
-                                      { return tan(arr[0]); }});<br>
-    eval_.funcs->insert("asin", {1, -1u, [](const double* arr) -> double
-                                       { return asin(arr[0]); }});<br>
-    eval_.funcs->insert("acos", {1, -1u, [](const double* arr) -> double
-                                       { return acos(arr[0]); }});<br>
-    eval_.funcs->insert("atan", {1, -1u, [](const double* arr) -> double
-                                       { return atan(arr[0]); }});<br>
-    eval_.funcs->insert("sqrt", {1, -1u, [](const double* arr) -> double
-                                       { return sqrt(arr[0]); }});<br>
-    eval_.funcs->insert("log", {1, -1u, [](const double* arr) -> double
-                                      { return log(arr[0]); }});<br>
-    eval_.funcs->insert("log10", {1, -1u, [](const double* arr) -> double
-                                        { return log10(arr[0]); }});<br>
-    eval_.funcs->insert("exp", {1, -1u, [](const double* arr) -> double
-                                      { return exp(arr[0]); }});<br>
-    eval_.funcs->insert("abs", {1, -1u, [](const double* arr) -> double
-                                      { return abs(arr[0]); }});<br>
-    eval_.funcs->insert("floor", {1, -1u, [](const double* arr) -> double
-                                        { return floor(arr[0]); }});<br>
-    eval_.funcs->insert("ceil", {1, -1u, [](const double *arr) -> double
-                                       { return ceil(arr[0]); }});<br>
+初始化分析器：<br>
+实现放在了eval_DOUBLE.help里面<br>
+（另外可以稍微理解一下我说的常量判断是指的什么）<br>
 
 ----------
 添加常变量：<br>
