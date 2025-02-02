@@ -23,6 +23,10 @@
 ------------------------------------------------
 具体使用：
 ----------------------------------------------
+注意一下内容由于写的比较早可能已经不对了
+具体情况请移步探索
+
+------------------------------------------------
 eval::func是基础函数单元<br>
 其中三个成员分别为函数参数数量，优先级大小，具体实现<br>
 size_t size;<br>
@@ -56,10 +60,10 @@ eval为表达式分析求值单元<br>
 std::function<bool(const char&)> constbegin_,//表示非用户定义常量开头判断<br>
 std::function<bool(const char&)> constin_,//表示非用户定义常量中间判断<br>
 std::function<type(const std::string&)> stot_,//提供string -> type函数<br>
-sstree<var<type>>* vars_,（可省）//提供变量表指针，SSTREEE就请自己看看实现了（码不动了，也欢迎大家补充）<br>
-sstree<func<type>>* funcs_,（可省）//提供普通函数表表指针<br>
-sstree<func<type>>* oper1_,（可省）//提供1元函数表指针<br>
-sstree<func<type>>* oper2_（可省）//提供2元函数表指针<br>
+std::shared_ptr<sstree<var<type>>> vars_,（可省）//提供变量表指针，SSTREEE就请自己看看实现了（码不动了，也欢迎大家补充）<br>
+std::shared_ptr<sstree<func<type>>> funcs_,（可省）//提供普通函数表表指针<br>
+std::shared_ptr<sstree<func<type>>> oper1_,（可省）//提供1元函数表指针<br>
+std::shared_ptr<sstree<func<type>>> oper2_（可省）//提供2元函数表指针<br>
 成员函数<br>
 size_t cpre(epre<type>& epre_,const std::string &str);<br>
 可以通过一个string表达式初始化epre<br>
