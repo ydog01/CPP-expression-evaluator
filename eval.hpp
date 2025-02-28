@@ -4,12 +4,12 @@
 namespace eval
 {
     template<typename type>
-    size_t eval<type>::cpre(epre<type>& epre_,const std::string &str)
+    size_t eval<type>::cpre(epre<type>& epre_, const std::string& str)
     {
-        size_t flag = 0,Lpos;
+        size_t flag = 0, Lpos;
         typename sstree<func<type>>::iterator fptr;
         typename sstree<var<type>>::iterator vptr;
-        std::vector<func<type> *> Lfuncs;
+        std::vector<func<type>*> Lfuncs;
         for (size_t pos = 0; pos < str.size(); pos++)
         {
             if (pos == flag)
@@ -19,10 +19,10 @@ namespace eval
                     Lfuncs.push_back(nullptr);
                     flag++;
                 }
-                else if(constbegin(str[pos]))
+                else if (constbegin(str[pos]))
                 {
-                    Lpos=pos;
-                    while (++pos<str.size()&&constin(str[pos]));
+                    Lpos = pos;
+                    while (++pos < str.size() && constin(str[pos]));
                     epre_.consts.push_back(stot(str.substr(Lpos, pos - Lpos)));
                     epre_.index.push_back('c');
                     pos--;
@@ -34,46 +34,55 @@ namespace eval
                     {
                         do
                             funcs->setptr(fptr);
-                        while (++pos < str.size()&&str[pos]!='('&&(fptr = funcs->find(str[pos])));
-                        if((str[pos]=='(')&&(fptr->data))
+                        while (++pos < str.size() && str[pos] != '(' && (fptr = funcs->find(str[pos])));
+                        if ((str[pos] == '(') && (fptr->data))
                         {
                             Lfuncs.push_back(fptr->data);
                             Lfuncs.push_back(nullptr);
-                            flag=++pos;
+                            flag = ++pos;
                         }
                         else
-                            pos=Lpos;
+                        {
+                            funcs->setptr(funcs->begin());
+                            pos = Lpos;
+                        }
                         funcs->rebegin();
                     }
-                    if((pos==Lpos)&&(vptr=vars->find(str[pos])))
+                    if ((pos == Lpos) && (vptr = vars->find(str[pos])))
                     {
                         do
                             vars->setptr(vptr);
-                        while(++pos<str.size()&&(vptr=vars->find(str[pos])));
-                        if(vars->data())
+                        while (++pos < str.size() && (vptr = vars->find(str[pos])));
+                        if (vars->data())
                         {
                             epre_.vars.push_back(&(vars->data()->value));
                             epre_.index.push_back('v');
                         }
                         else
-                            pos=Lpos;
+                        {
+                            vars->setptr(vars->begin());
+                            pos = Lpos;
+                        }
                         vars->rebegin();
                     }
-                    if((pos==Lpos)&&(fptr=oper1->find(str[pos])))
+                    if ((pos == Lpos) && (fptr = oper1->find(str[pos])))
                     {
                         do
                             oper1->setptr(fptr);
-                        while (++pos<str.size()&&(fptr=oper1->find(str[pos])));
-                        if(oper1->data())
+                        while (++pos < str.size() && (fptr = oper1->find(str[pos])));
+                        if (oper1->data())
                         {
                             Lfuncs.push_back(oper1->data());
-                            flag=pos;
+                            flag = pos;
                         }
                         else
-                            pos=Lpos;
+                        {
+                            oper1->setptr(oper1->begin());
+                            pos = Lpos;
+                        }
                         oper1->rebegin();
                     }
-                    if(pos==Lpos)
+                    if (pos == Lpos)
                         return pos;
                     else
                         pos--;
@@ -121,33 +130,36 @@ namespace eval
                         Lfuncs.push_back(oper2->data());
                     }
                     else
+                    {
+                        oper2->setptr(oper2->begin());
                         return pos;
+                    }
                     flag = pos--;
                     oper2->rebegin();
                 }
                 else
                     return pos;
-            }        
+            }
         }
-        while(Lfuncs.size())
+        while (Lfuncs.size())
         {
-            if(!Lfuncs.back())
+            if (!Lfuncs.back())
                 return str.size();
             epre_.funcs.push_back(Lfuncs.back());
             epre_.index.push_back('f');
             Lfuncs.pop_back();
         }
         return -1;
-    } 
+    }
     template<typename type>
     type eval<type>::result(const epre<type>& epre_)
     {
-        size_t fpos=0,vpos=0,cpos=0,LSE;
+        size_t fpos = 0, vpos = 0, cpos = 0, LSE;
         type LRE;
         std::vector<type> stack;
-        for(const char&ch:epre_.index)
+        for (const char& ch : epre_.index)
         {
-            switch(ch)
+            switch (ch)
             {
             case 'f':
                 LSE = epre_.funcs[fpos]->size;
@@ -166,10 +178,10 @@ namespace eval
                 stack.push_back(epre_.consts[cpos++]);
                 break;
             default:
-                throw std::runtime_error(std::string("eval::result:invalid index")+std::string(ch,1));
+                throw std::runtime_error(std::string("eval::result:invalid index") + std::string(ch, 1));
             }
         }
-        if(stack.size()!=1)
+        if (stack.size() != 1)
             throw std::runtime_error("eval::result:stack size error");
         return stack.back();
     }
