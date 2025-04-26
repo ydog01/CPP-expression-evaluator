@@ -1,105 +1,125 @@
-# CPP-expression-evaluator
-表达式计算分析库
------------------------------------------------
-关于如何使用：
-----------------------------------------------
-我提供了包含头文件"eval.hpp"<br>
-其中具有命名空间eval<br>
-主要内容就在其中了<br>
-关于其中类的作用与具体使用我放在README结尾
+表达式求值库（eval）使用指南
+简介
+该库提供了一种灵活的方式来解析和计算数学表达式，支持变量、函数、运算符以及自定义扩展。通过模板化设计，用户可以选择不同的数据类型（如 double、float），并动态注册函数和变量。
 
------------------------------------------------
-关于实现：
-----------------------------------------------
-基于我自己拓展过的逆波兰序
+功能特性
+基本运算符：支持加减乘除、幂运算、取模等。
 
----------------------------------------------
-当前支持:
-----------------------------------------------
-  （1）自定义变量，常量，函数，一二元运算符<br>
-  （2）还可以通过自定义用来计算一些除了实数以外的东西<br>
-  （比如字符串，自定义高精度，复数之类的）
-  
-------------------------------------------------
-具体使用：
-----------------------------------------------
-注意一下内容由于写的比较早可能已经不对了
-具体情况请移步探索
+数学函数：内置 sin, cos, log 等常见函数。
 
-------------------------------------------------
-eval::func是基础函数单元<br>
-其中三个成员分别为函数参数数量，优先级大小，具体实现<br>
-size_t size;<br>
-size_t flag;<br>
-std::function<type(const type*)> f;<br>
-具体实现为一个可调用对象type(const type*)<br>
-可调用对象使用的话看个例子<br>
-加法：[](const double*arr)->double {return arr[0]+arr[1]; }<br>
-正弦：[](const double*arr)->double {return sin(arr[0]); }<br>
-自己理解一下就好了
+常量与变量：支持预定义常量（如 pi, e）和自定义变量。
 
-----------------------------------------------
-var为常变量基本单元<br>
-有两个成员分别表示属性和值<br>
-vartype vtype;//可以取值eval::vartype::CONSTVAR表示常量，eval::vartype::FREEVAR表示变量<br>
-type value;
+优先级与括号：自动处理运算符优先级和括号嵌套。
 
-----------------------------------------------
-epre为表达式存储单元<br>
-其中有<br>
-std::vector<func<type>*> funcs;//函数<br>
-std::vector<type*> vars;//变量<br>
-std::vector<type> consts;//常量<br>
-std::string index;//索引<br>
-void clear()//重置表达式<br>
-epre不需要初始化，它将由eval生成
+扩展性：可自定义函数、运算符及变量。
 
-----------------------------------------------
-eval为表达式分析求值单元<br>
-初始化需要<br>
-std::function<bool(const char&)> constbegin_,//表示非用户定义常量开头判断<br>
-std::function<bool(const char&)> constin_,//表示非用户定义常量中间判断<br>
-std::function<type(const std::string&)> stot_,//提供string -> type函数<br>
-std::shared_ptr<sstree<var<type>>> vars_,（可省）//提供变量表指针，SSTREEE就请自己看看实现了（码不动了，也欢迎大家补充）<br>
-std::shared_ptr<sstree<func<type>>> funcs_,（可省）//提供普通函数表表指针<br>
-std::shared_ptr<sstree<func<type>>> oper1_,（可省）//提供1元函数表指针<br>
-std::shared_ptr<sstree<func<type>>> oper2_（可省）//提供2元函数表指针<br>
-成员函数<br>
-size_t cpre(epre<type>& epre_,const std::string &str);<br>
-可以通过一个string表达式初始化epre<br>
-type result(const epre<type>& epre_);<br>
-可以计算一个epre的当前值
+快速开始
+包含头文件
+cpp
+#include "eval_init.hpp"
+示例代码
+cpp
+#include <iostream>
+#include "eval_init.hpp"
 
-----------------------------------------------
-
-具体使用例子：
--------------
-比如需要double实数求值
-
-------------
-初始化分析器：<br>
-实现放在了eval_DOUBLE.help里面<br>
-（另外可以稍微理解一下我说的常量判断是指的什么）<br>
-
-----------
-添加常变量：<br>
-    eval_.vars.first->insert("PI",{eval::vartype::CONSTVAR,M_PI});<br>
-    eval_.vars.first->insert("a",{eval::vartype::FREEVAR,0.0});<br>
-
------------
-修改常变量的值：<br>
-    eval_.vars.first->search("变量名")->data->value=修改值;<br>
-    （要注意常量标志的作用仅为标志，具体改不改值取决于你）<br>
-    另外其实有很多东西是可以获取的，但是这边讲不下去了（太多了，建议自己翻阅一下）<br>
-
--------------
-分析计算表达式：<br>
-    eval::epre<double> epre;（保存前确定epre是否为空，为空的话clear一下）<br>
-    eval_.cpre(epre,“1*(sin(PI/a))”);(分析表达式，成功返回-1u，失败返回失败索引值)<br>
-    eval_.result(epre);（计算表达式的值，返回结果，失败抛出一个std::runtime_error）<br>
+int main() 
+{
+    // 创建 double 类型的求值器
+    auto calc = eval_init::create_real_eval<double>();
     
------------------------------------------------
-我以后会更新更多内容的，敬请期待~<br>
-我的QQ:1917927623<br>
-（话说我其实不知道README怎么写来着。。。）
------------------------------------------------
+    // 解析并计算表达式
+    eval::epre<double> expr;
+    size_t error_pos = calc.parse_expression(expr, "3 + 5 * sin(pi/2)");
+    
+    if (error_pos != static_cast<size_t>(-1)) 
+    {
+        std::cerr << "解析错误，位置: " << error_pos << std::endl;
+        return 1;
+    }
+    
+    try 
+    {
+        double result = calc.evaluate(expr);
+        std::cout << "结果: " << result << std::endl; // 输出 8.0
+    } 
+    catch (const std::runtime_error& e) 
+    {
+        std::cerr << "计算错误: " << e.what() << std::endl;
+    }
+    
+    return 0;
+}
+详细用法
+1. 初始化求值器
+使用 eval_init::create_real_eval<T>() 创建指定类型的求值器：
+
+cpp
+auto calc = eval_init::create_real_eval<float>();  // 使用 float 类型
+2. 解析表达式
+调用 parse_expression 解析表达式字符串：
+
+cpp
+eval::epre<double> expr;
+size_t error_pos = calc.parse_expression(expr, "2^3 + log(100)");
+若返回 error_pos 不等于 -1，表示解析出错的位置。
+
+解析后的中间结果存储在 expr 对象中。
+
+3. 计算结果
+使用 evaluate 方法计算结果：
+
+cpp
+double result = calc.evaluate(expr);
+扩展功能
+添加自定义函数
+cpp
+eval::func<double> custom_op
+{
+    2,                                // 参数数量
+    size_t(-1),                       // 最高优先级
+    [](const double* args) { return args[0] * args[1] + 1; }
+};
+calc.funcs->insert("myfunc", custom_op);
+添加自定义变量
+cpp
+eval::var<double> my_var
+{
+    eval::vartype::FREEVAR,           // 变量类型（可修改）
+    42.0                              // 初始值
+};
+calc.vars->insert("myvar", my_var);
+运算符优先级
+优先级数值越大，运算顺序越优先。
+
+内置优先级：
+
+加减：1
+
+乘除：2
+
+幂、取模：3
+
+函数：size_t(-1)（最高）
+
+错误处理
+解析错误：parse_expression 返回错误位置。
+
+计算错误：evaluate 抛出 std::runtime_error，需捕获处理。
+
+API 参考
+主要类
+evaluator<CharType, DataType>：求值器核心类。
+
+sstree<CharType, DataType>：前缀树结构，用于存储符号。
+
+epre<DataType>：存储解析后的表达式信息。
+
+关键方法
+parse_expression(expr, str)：解析表达式字符串。
+
+evaluate(expr)：计算表达式结果。
+
+insert(key, data)：向符号树插入函数或变量。
+
+许可证
+自由使用，遵循 MIT 许可证。
