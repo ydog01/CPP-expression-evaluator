@@ -69,10 +69,11 @@
 <a id="快速开始"></a>快速开始
 ----------------------------
 基本使用
-cpp
+```
 #include "eval_init.hpp"
 
-int main() {
+int main() 
+{
     // 创建double类型的计算器实例
     auto calc = eval_init::create_real_eval<double>();
     
@@ -87,6 +88,7 @@ int main() {
     
     return 0;
 }
+```
 
 ----------------------------
 
@@ -144,23 +146,25 @@ pi: π值
 e: 自然对数的底
 
 表达式示例
-cpp
+```
 "2 + 3 * 4"           // 基本算术
 "sin(pi/2) + cos(0)"  // 函数调用
 "-3^2"                // 幂运算与负号
 "log(2, 8)"           // 对数函数
 "e^(ln(5))"           // 自然对数和指数
+```
 
 ----------------------------
 
 <a id="自定义扩展"></a>自定义扩展
 ----------------------------
 添加自定义函数
-cpp
+```
 auto calc = eval_init::create_real_eval<double>();
 
 // 定义自定义函数
-eval::func<double> sqrt_op{
+eval::func<double> sqrt_op
+{
     1, 
     size_t(-1),  // 最高优先级
     [](const double *args) { return sqrt(args[0]); }
@@ -171,7 +175,8 @@ calc.funcs->insert("sqrt", sqrt_op);
 添加自定义变量
 cpp
 // 定义变量
-eval::var<double> my_var{
+eval::var<double> my_var
+{
     eval::vartype::FREEVAR,  // 可变量
     42.0                     // 初始值
 };
@@ -181,10 +186,12 @@ calc.vars->insert("my_var", my_var);
 添加自定义运算符
 cpp
 // 定义阶乘后缀运算符
-eval::func<double> fact_op{
+eval::func<double> fact_op
+{
     1, 
     size_t(-1),  // 最高优先级
-    [](const double *args) { 
+    [](const double *args) 
+    { 
         double result = 1;
         for (int i = 2; i <= args[0]; ++i)
             result *= i;
@@ -194,17 +201,19 @@ eval::func<double> fact_op{
 
 // 注册为后缀运算符
 calc.suffix_ops->insert("!", fact_op);
+```
 
 ----------------------------
 
 <a id="示例代码"></a>示例代码
 ----------------------------
 基本计算示例
-cpp
+```
 #include <iostream>
 #include "eval_init.hpp"
 
-int main() {
+int main() 
+{
     auto calc = eval_init::create_real_eval<double>();
     eval::epre<double> expr;
     
@@ -230,7 +239,8 @@ cpp
 auto calc = eval_init::create_real_eval<double>();
 
 // 添加自定义max函数
-eval::func<double> max_op{
+eval::func<double> max_op
+{
     2, 
     size_t(-1),
     [](const double *args) { return std::max(args[0], args[1]); }
@@ -240,6 +250,7 @@ calc.funcs->insert("max", max_op);
 eval::epre<double> expr;
 calc.parse_expression(expr, "max(3, 7)");
 std::cout << "Result: " << calc.evaluate(expr) << std::endl;  // 输出7
+```
 
 ----------------------------
 
