@@ -15,9 +15,9 @@
 
 <tr><th>7. 注意事项</th></tr>
 
-<tr><th>8. 性能考虑</th></tr>
+<tr><th>8. 错误处理</th></tr>
 
-<tr><th>9. 许可证</th></tr>
+<tr><th>9. 性能考虑</th></tr>
 </table>
 
 ----------------------------
@@ -41,17 +41,17 @@
 <tr><th>6. 常量定义</th></tr>
 </table>
 
-**库采用头文件方式实现，无需额外编译**，只需包含**eval.hpp**和**eval_init.hpp** (如果需要默认实数初始化的话)即可使用。
+**库采用头文件方式实现，无需额外编译**，只需包含**eval.hpp**和**eval_init_complex.hpp** (如果需要默认复数初始化)/**eval_init.hpp** (如果需要默认实数初始化)即可使用。
 
 ----------------------------
 
 <a id="功能特性"></a>功能特性
 ----------------------------
-**多种数据类型**：支持**float、double、long double等类型**，甚至是 ***自定义类型*** 比如**complex**这些
+**多种数据类型**：支持**float、double、long double等类型**，甚至是 ***自定义类型*** 比如**自定义高精度**这些
 
 **变量支持**：支持动态定义**变量**和**常量**
 
-**默认运算符与函数**: 如果你需要的是 ***实数类型*** ，则可以直接 ***通过模板创建支持大量函数/运算符的解析器***
+**默认运算符与函数**: 如果你需要的是 ***实数类型*** 或者 ***复数类型***  ，则可以直接 ***通过模板创建支持大量函数/运算符的解析器***
 
 **自定义运算符**：可扩展前缀、中缀和后缀运算符
 
@@ -75,12 +75,9 @@ int main()
 {
     // 创建double类型的计算器实例
     auto calc = eval_init::create_real_eval<double>();
-    
-    // 准备表达式结构
-    eval::epre<double> expr;
-    
+	
     // 解析表达式
-    calc.parse_expression(expr, "2 + 3 * sin(pi/2)");
+    auto expr = calc.parse("2 + 3 * sin(pi/2)");
     
     // 计算表达式
     double result = calc.evaluate(expr);
@@ -102,11 +99,14 @@ evaluator<CharType, DataType>:
 
 主要方法
 ----------------------------
-<table class="api-table"> <tr> <th>方法</th> <th>描述</th> </tr> <tr> <td><code>parse_expression</code></td> <td>解析表达式字符串</td> </tr> <tr> <td><code>evaluate</code></td> <td>计算已解析的表达式</td> </tr> </table>
+<table class="api-table"> <tr> <th>方法</th> <th>描述</th> </tr> <tr> <td><code>parse</code></td> <td>解析表达式字符串</td> </tr> <tr> <td><code>evaluate</code></td> <td>计算已解析的表达式</td> </tr> </table>
+
+----------------------------
 epre<DataType>
-表达式中间表示结构，存储解析后的表达式信息。
+为表达式中间结构，存储解析后的表达式信息。
 
 成员变量
+
 funcs: 函数/运算符列表
 
 vars: 变量引用列表
@@ -178,7 +178,7 @@ auto calc = eval_init::create_real_eval<double>();
 eval::func<double> sqrt_op
 {
     1, 
-    size_t(-1),  // 最高优先级
+    eval::size_max,  // 最高优先级
     [](const double *args) { return sqrt(args[0]); }
 };
 
@@ -205,7 +205,7 @@ calc.vars->insert("my_var", my_var);
 eval::func<double> fact_op
 {
     1, 
-    size_t(-1),  // 最高优先级
+    eval::size_max,  // 最高优先级
     [](const double *args) 
     { 
         double result = 1;
@@ -278,11 +278,9 @@ std::cout << "Result: " << calc.evaluate(expr) << std::endl;  // 输出7
 
 错误处理
 ----------------------------
-语法错误时，parse_expression会返回错误位置
+语法错误时（如未定义的变量或函数），parse会抛出错误位置
 
-计算错误（如除以零）会抛出std::runtime_error
-
-未定义的变量或函数会导致解析失败
+计算错误（如除以零，函数调用错误时）时,evaluate会抛出std::runtime_error
 
 ----------------------------
 
@@ -295,12 +293,6 @@ std::cout << "Result: " << calc.evaluate(expr) << std::endl;  // 输出7
 内存使用：epre结构会存储所有中间结果，复杂表达式可能占用较多内存
 
 <div class="note"> <strong>优化建议：</strong> 对于需要重复计算的表达式，可以解析一次后保存<code>epre</code>结构，然后多次调用<code>evaluate</code>。 </div>
-
-----------------------------
-
-<a id="许可证"></a>许可证
-----------------------------
-本项目采用MIT许可证发布，可以自由使用于个人和商业项目。
 
 ----------------------------
 作者QQ number:1917927623
