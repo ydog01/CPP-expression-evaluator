@@ -24,7 +24,7 @@ namespace eval_init
     }
 
     template<typename T>
-    eval::evaluator<char, double> create_real_eval()
+    eval::evaluator<char, T> create_real_eval()
     {
         using namespace eval;
         evaluator<char, T> calc(
