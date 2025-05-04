@@ -100,6 +100,8 @@ namespace eval_init
                              { return std::log2(args[0]); }};
         func<T> sqrt_op{1, size_max, [](const T *args)
                         { return std::sqrt(args[0]); }};
+        func<T> abs_op{1, size_max, [](const T *args)
+                        { return std::abs(args[0]); }};
 
         calc.funcs->insert("sin", sin_op);
         calc.funcs->insert("cos", cos_op);
@@ -115,6 +117,7 @@ namespace eval_init
         calc.funcs->insert("ln", ln_op);
         calc.funcs->insert("log2", log2_op);
         calc.funcs->insert("sqrt", sqrt_op);
+        calc.funcs->insert("abs", abs_op);
 
         // 注册数学常量
         var<T> pi{vartype::CONSTVAR,std::acos(T(-1))};
