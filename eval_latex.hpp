@@ -5,6 +5,9 @@
 #include <stdexcept>
 #include <cctype>
 #include <unordered_set>
+#include <stack>
+#include <vector>
+#include <algorithm>
 
 namespace eval
 {
@@ -213,17 +216,16 @@ namespace eval
             }
 
             if (cmd == "frac")
-            {
                 return parse_frac(latex, pos);
-            }
-            else if (cmd == "sqrt")
-            {
+            if (cmd == "sqrt")
                 return parse_sqrt(latex, pos);
-            }
-            else if (cmd == "log")
-            {
+            if (cmd == "log")
                 return parse_log(latex, pos);
-            }
+            if (cmd == "cdot" || cmd == "times")
+                return "*";
+            if (cmd == "div")
+                return "/";
+                
             else if (pos < latex.size() && latex[pos] == '{')
             {
                 std::basic_string<cType> arg = parse_braces(latex, pos);
@@ -231,6 +233,85 @@ namespace eval
             }
             return cmd;
         }
+
+        int get_precedence(const std::basic_string<cType>& op)
+        {
+            if (op == "^") return 4;
+            if (op == "*" || op == "/" || op == "%") return 3;
+            if (op == "+" || op == "-") return 2;
+            return 0;
+        }
+
+        bool is_operator(const std::basic_string<cType>& s)
+        {
+            return s == "+" || s == "-" || s == "*" || s == "/" || s == "^" || s == "%";
+        }
+
+        bool is_function(const std::basic_string<cType>& s)
+        {
+            return s.find('(') != std::basic_string<cType>::npos && 
+                   s.find(')') != std::basic_string<cType>::npos &&
+                   s.find(',') == std::basic_string<cType>::npos;
+        }
+
+        bool is_multi_arg_function(const std::basic_string<cType>& s)
+        {
+            return s.find('(') != std::basic_string<cType>::npos && 
+                   s.find(')') != std::basic_string<cType>::npos &&
+                   s.find(',') != std::basic_string<cType>::npos;
+        }
+
+        std::vector<std::basic_string<cType>> tokenize(const std::basic_string<cType>& expr)
+        {
+            std::vector<std::basic_string<cType>> tokens;
+            size_t pos = 0;
+            
+            while (pos < expr.size())
+            {
+                if (std::isspace(expr[pos]))
+                {
+                    pos++;
+                    continue;
+                }
+                
+                if (std::isalpha(expr[pos]))
+                {
+                    size_t start = pos;
+                    while (pos < expr.size() && (std::isalnum(expr[pos]) || expr[pos] == '_'))
+                    {
+                        pos++;
+                    }
+                    tokens.push_back(expr.substr(start, pos - start));
+                }
+                else if (std::isdigit(expr[pos]))
+                {
+                    size_t start = pos;
+                    while (pos < expr.size() && std::isdigit(expr[pos]))
+                    {
+                        pos++;
+                    }
+                    tokens.push_back(expr.substr(start, pos - start));
+                }
+                else if (expr[pos] == '(' || expr[pos] == ')')
+                {
+                    tokens.push_back(std::basic_string<cType>(1, expr[pos]));
+                    pos++;
+                }
+                else if (is_operator(std::basic_string<cType>(1, expr[pos])))
+                {
+                    tokens.push_back(std::basic_string<cType>(1, expr[pos]));
+                    pos++;
+                }
+                else if (expr[pos] == ',')
+                {
+                    tokens.push_back(",");
+                    pos++;
+                }
+            }
+            
+            return tokens;
+        }
+
 
     public:
         void register_variable(const std::basic_string<cType> &var)
@@ -292,6 +373,7 @@ namespace eval
             }
             return result;
         }
+
     };
 }
 
