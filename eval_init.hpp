@@ -5,60 +5,68 @@
 
 namespace eval_init
 {
-    template<typename T>
-    T convert(const std::string&);
-    template<>
-    inline double convert<double>(const std::string&str)
+    template <typename T>
+    T convert(const std::string &);
+    template <>
+    inline double convert<double>(const std::string &str)
     {
         return std::stod(str);
     }
-    template<>
-    inline float convert<float>(const std::string&str)
+    template <>
+    inline float convert<float>(const std::string &str)
     {
         return std::stof(str);
     }
-    template<>
-    inline long double convert<long double>(const std::string&str)
+    template <>
+    inline long double convert<long double>(const std::string &str)
     {
         return std::stold(str);
     }
 
-    template<typename T>
+    template <typename T>
     eval::evaluator<char, T> create_real_eval()
     {
         using namespace eval;
         evaluator<char, T> calc(
-            [](const std::string &str,size_t& pos,epre<T> &expr) -> bool
+            [](const std::string &str, size_t &pos, epre<T> &expr) -> bool
             {
-                if(str[pos]<'0'||str[pos]>'9')
+                if (str[pos] < '0' || str[pos] > '9')
                     return false;
                 size_t start = pos;
-                while (pos < str.size() && str[pos]>='0'&&str[pos]<='9')
+                while (pos < str.size() && str[pos] >= '0' && str[pos] <= '9')
                     pos++;
-                if(str[pos]=='.'&&str[pos+1]>='0'&&str[pos+1]<='9')
-                    do pos++;
-                    while (pos < str.size() && str[pos]>='0'&&str[pos]<='9');
+                if (str[pos] == '.' && str[pos + 1] >= '0' && str[pos + 1] <= '9')
+                    do
+                        pos++;
+                    while (pos < str.size() && str[pos] >= '0' && str[pos] <= '9');
+                if (str[pos] == 'e' || str[pos] == 'E')
+                {
+                    pos++;
+                    if (str[pos] == '+' || str[pos] == '-')
+                        pos++;
+                    while (pos < str.size() && str[pos] >= '0' && str[pos] <= '9')
+                        pos++;
+                }
                 expr.consts.push_back(convert<T>(str.substr(start, pos - start)));
                 expr.index += 'c';
                 return true;
-            }
-        );
+            });
 
         // 注册基本运算符
         func<T> add_op{2, 1, [](const T *args)
-                            { return args[0] + args[1]; }};
+                       { return args[0] + args[1]; }};
         func<T> sub_op{2, 1, [](const T *args)
-                            { return args[0] - args[1]; }};
+                       { return args[0] - args[1]; }};
         func<T> mul_op{2, 2, [](const T *args)
-                            { return args[0] * args[1]; }};
+                       { return args[0] * args[1]; }};
         func<T> div_op{2, 2, [](const T *args)
-                            { return args[0] / args[1]; }};
+                       { return args[0] / args[1]; }};
         func<T> pow_op{2, 3, [](const T *args)
-                            { return std::pow(args[0], args[1]); }};
+                       { return std::pow(args[0], args[1]); }};
         func<T> mod_op{2, 2, [](const T *args)
-                            { return std::fmod(args[0], args[1]); }};
+                       { return std::fmod(args[0], args[1]); }};
         func<T> neg_op{1, 2, [](const T *args)
-                            { return -args[0]; }};
+                       { return -args[0]; }};
         func<T> aff_op{1, 2, [](const T *args)
                        { return args[0]; }};
 
@@ -73,37 +81,67 @@ namespace eval_init
 
         // 注册数学函数
         func<T> sin_op{1, size_max, [](const T *args)
-                            { return std::sin(args[0]); }};
+                       { return std::sin(args[0]); }};
         func<T> cos_op{1, size_max, [](const T *args)
-                            { return std::cos(args[0]); }};
+                       { return std::cos(args[0]); }};
         func<T> tan_op{1, size_max, [](const T *args)
-                            { return std::tan(args[0]); }};
+                       { return std::tan(args[0]); }};
         func<T> asin_op{1, size_max, [](const T *args)
-                             { return std::asin(args[0]); }};
+                        { return std::asin(args[0]); }};
         func<T> acos_op{1, size_max, [](const T *args)
-                             { return std::acos(args[0]); }};
+                        { return std::acos(args[0]); }};
         func<T> atan_op{1, size_max, [](const T *args)
-                             { return std::atan(args[0]); }};
+                        { return std::atan(args[0]); }};
+        func<T> atan2_op{2, size_max, [](const T *args)
+                         { return std::atan2(args[0], args[1]); }};
         func<T> sinh_op{1, size_max, [](const T *args)
-                             { return std::sinh(args[0]); }};
+                        { return std::sinh(args[0]); }};
         func<T> cosh_op{1, size_max, [](const T *args)
-                             { return std::cosh(args[0]); }};
+                        { return std::cosh(args[0]); }};
         func<T> tanh_op{1, size_max, [](const T *args)
-                             { return std::tanh(args[0]); }};
+                        { return std::tanh(args[0]); }};
         func<T> log_op{2, size_max, [](const T *args)
-                            { return std::log(args[1]) / log(args[0]); }};
+                       { return std::log(args[1]) / std::log(args[0]); }};
         func<T> lg_op{1, size_max, [](const T *args)
-                           { return std::log10(args[0]); }};
+                      { return std::log10(args[0]); }};
         func<T> ln_op{1, size_max, [](const T *args)
-                           { return std::log(args[0]); }};
+                      { return std::log(args[0]); }};
         func<T> log2_op{1, size_max, [](const T *args)
-                             { return std::log2(args[0]); }};
+                        { return std::log2(args[0]); }};
         func<T> sqrt_op{1, size_max, [](const T *args)
                         { return std::sqrt(args[0]); }};
+        func<T> cbrt_op{1, size_max, [](const T *args)
+                        { return std::cbrt(args[0]); }};
         func<T> abs_op{1, size_max, [](const T *args)
-                        { return std::abs(args[0]); }};
+                       { return std::abs(args[0]); }};
+        func<T> exp_op{1, size_max, [](const T *args)
+                       { return std::exp(args[0]); }};
+        func<T> exp2_op{1, size_max, [](const T *args)
+                        { return std::exp2(args[0]); }};
+        func<T> ceil_op{1, size_max, [](const T *args)
+                        { return std::ceil(args[0]); }};
+        func<T> floor_op{1, size_max, [](const T *args)
+                         { return std::floor(args[0]); }};
+        func<T> round_op{1, size_max, [](const T *args)
+                         { return std::round(args[0]); }};
+        func<T> trunc_op{1, size_max, [](const T *args)
+                         { return std::trunc(args[0]); }};
+        func<T> erf_op{1, size_max, [](const T *args)
+                       { return std::erf(args[0]); }};
+        func<T> erfc_op{1, size_max, [](const T *args)
+                        { return std::erfc(args[0]); }};
+        func<T> tgamma_op{1, size_max, [](const T *args)
+                          { return std::tgamma(args[0]); }};
+        func<T> lgamma_op{1, size_max, [](const T *args)
+                          { return std::lgamma(args[0]); }};
+        func<T> hypot_op{2, size_max, [](const T *args)
+                         { return std::hypot(args[0], args[1]); }};
         func<T> root_op{2, size_max, [](const T *args)
-                       { return std::pow(args[1],T(1)/args[0]); }};
+                        { return std::pow(args[1], T(1) / args[0]); }};
+        func<T> min_op{2, size_max, [](const T *args)
+                       { return std::min(args[0], args[1]); }};
+        func<T> max_op{2, size_max, [](const T *args)
+                       { return std::max(args[0], args[1]); }};
 
         calc.funcs->insert("sin", sin_op);
         calc.funcs->insert("cos", cos_op);
@@ -111,6 +149,7 @@ namespace eval_init
         calc.funcs->insert("asin", asin_op);
         calc.funcs->insert("acos", acos_op);
         calc.funcs->insert("atan", atan_op);
+        calc.funcs->insert("atan2", atan2_op);
         calc.funcs->insert("sinh", sinh_op);
         calc.funcs->insert("cosh", cosh_op);
         calc.funcs->insert("tanh", tanh_op);
@@ -119,15 +158,33 @@ namespace eval_init
         calc.funcs->insert("ln", ln_op);
         calc.funcs->insert("log2", log2_op);
         calc.funcs->insert("sqrt", sqrt_op);
+        calc.funcs->insert("cbrt", cbrt_op);
         calc.funcs->insert("abs", abs_op);
+        calc.funcs->insert("exp", exp_op);
+        calc.funcs->insert("exp2", exp2_op);
+        calc.funcs->insert("ceil", ceil_op);
+        calc.funcs->insert("floor", floor_op);
+        calc.funcs->insert("round", round_op);
+        calc.funcs->insert("trunc", trunc_op);
+        calc.funcs->insert("erf", erf_op);
+        calc.funcs->insert("erfc", erfc_op);
+        calc.funcs->insert("tgamma", tgamma_op);
+        calc.funcs->insert("lgamma", lgamma_op);
+        calc.funcs->insert("hypot", hypot_op);
         calc.funcs->insert("root", root_op);
+        calc.funcs->insert("min", min_op);
+        calc.funcs->insert("max", max_op);
 
         // 注册数学常量
-        var<T> pi{vartype::CONSTVAR,std::acos(T(-1))};
-        var<T> e{vartype::CONSTVAR,std::exp(T(1))};
+        var<T> pi{vartype::CONSTVAR, std::acos(T(-1))};
+        var<T> e{vartype::CONSTVAR, std::exp(T(1))};
+        var<T> inf{vartype::CONSTVAR, std::numeric_limits<T>::infinity()};
+        var<T> nan{vartype::CONSTVAR, std::numeric_limits<T>::quiet_NaN()};
 
-        calc.vars->insert("pi",pi);
-        calc.vars->insert("e",e);
+        calc.vars->insert("pi", pi);
+        calc.vars->insert("e", e);
+        calc.vars->insert("inf", inf);
+        calc.vars->insert("nan", nan);
 
         return calc;
     }
