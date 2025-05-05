@@ -100,6 +100,12 @@ namespace eval_init
                         { return std::cosh(args[0]); }};
         func<T> tanh_op{1, size_max, [](const T *args)
                         { return std::tanh(args[0]); }};
+        func<T> asinh_op{1, size_max, [](const T *args)
+                        { return std::asinh(args[0]); }};
+        func<T> acosh_op{1, size_max, [](const T *args)
+                        { return std::acosh(args[0]); }};
+        func<T> atanh_op{1, size_max, [](const T *args)
+                        { return std::atanh(args[0]); }};
         func<T> log_op{2, size_max, [](const T *args)
                        { return std::log(args[1]) / std::log(args[0]); }};
         func<T> lg_op{1, size_max, [](const T *args)
@@ -153,6 +159,9 @@ namespace eval_init
         calc.funcs->insert("sinh", sinh_op);
         calc.funcs->insert("cosh", cosh_op);
         calc.funcs->insert("tanh", tanh_op);
+        calc.funcs->insert("asinh", sinh_op);
+        calc.funcs->insert("acosh", cosh_op);
+        calc.funcs->insert("atanh", tanh_op);
         calc.funcs->insert("log", log_op);
         calc.funcs->insert("lg", lg_op);
         calc.funcs->insert("ln", ln_op);
