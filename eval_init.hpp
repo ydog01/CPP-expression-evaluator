@@ -1,7 +1,7 @@
 #ifndef EVAL_INIT_HPP
 #define EVAL_INIT_HPP
 #include "eval.hpp"
-#include<cmath>
+#include <cmath>
 
 namespace eval_init
 {
@@ -36,8 +36,8 @@ namespace eval_init
                 while (pos < str.size() && str[pos]>='0'&&str[pos]<='9')
                     pos++;
                 if(str[pos]=='.'&&str[pos+1]>='0'&&str[pos+1]<='9')
-                    while (pos < str.size() && str[pos]>='0'&&str[pos]<='9')
-                        pos++;
+                    do pos++;
+                    while (pos < str.size() && str[pos]>='0'&&str[pos]<='9');
                 expr.consts.push_back(convert<T>(str.substr(start, pos - start)));
                 expr.index += 'c';
                 return true;
@@ -102,6 +102,8 @@ namespace eval_init
                         { return std::sqrt(args[0]); }};
         func<T> abs_op{1, size_max, [](const T *args)
                         { return std::abs(args[0]); }};
+        func<T> root_op{2, size_max, [](const T *args)
+                       { return std::pow(args[1],T(1)/args[0]); }};
 
         calc.funcs->insert("sin", sin_op);
         calc.funcs->insert("cos", cos_op);
@@ -118,6 +120,7 @@ namespace eval_init
         calc.funcs->insert("log2", log2_op);
         calc.funcs->insert("sqrt", sqrt_op);
         calc.funcs->insert("abs", abs_op);
+        calc.funcs->insert("root", root_op);
 
         // 注册数学常量
         var<T> pi{vartype::CONSTVAR,std::acos(T(-1))};

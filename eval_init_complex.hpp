@@ -21,8 +21,8 @@ namespace eval_init
                 while (pos < str.size() && str[pos] >= '0' && str[pos] <= '9')
                     pos++;
                 if (str[pos] == '.' && str[pos + 1] >= '0' && str[pos + 1] <= '9')
-                    while (pos < str.size() && str[pos] >= '0' && str[pos] <= '9')
-                        pos++;
+                    do pos++;
+                    while (pos < str.size() && str[pos] >= '0' && str[pos] <= '9');
                 expr.consts.push_back(T(convert<CT>(str.substr(start, pos - start)), CT(0)));
                 expr.index += 'c';
                 return true;

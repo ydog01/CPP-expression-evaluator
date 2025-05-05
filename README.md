@@ -258,7 +258,7 @@ auto calc = eval_init::create_real_eval<double>();
 eval::func<double> max_op
 {
     2, 
-    size_t(-1),
+    eval_init::size_max,
     [](const double *args) { return std::max(args[0], args[1]); }
 };
 calc.funcs->insert("max", max_op);
