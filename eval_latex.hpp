@@ -1,3 +1,16 @@
+/*
+
+经过我的实测
+
+这个还不能正常使用
+
+容易出BUG
+
+建议先别用
+
+*/
+
+
 #ifndef EVAL_LATEX_HPP
 #define EVAL_LATEX_HPP
 

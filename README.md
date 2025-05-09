@@ -7,7 +7,7 @@
   <tr><th>5. 前缀/中缀/后缀运算符</th></tr>
   <tr><th>6. 常量定义</th></tr>
   <tr><th>7. 复数运算</th></tr>
-  <tr><th>8. LaTeX解析</th></tr>
+  <tr><th>8. LaTeX解析(还不稳定)</th></tr>
 </table>
 
 <h2 id="功能特性">功能特性</h2>
