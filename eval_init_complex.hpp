@@ -136,17 +136,11 @@ namespace eval_init
         calc.funcs->insert("proj", proj_op);
 
         // 注册数学常量
-        var<T> pi{vartype::CONSTVAR, T(std::acos(CT(-1)), CT(0))};
-        var<T> e{vartype::CONSTVAR, T(std::exp(CT(1)), CT(0))};
-        var<T> i{vartype::CONSTVAR, T(CT(0), CT(1))};
-        var<T> inf{vartype::CONSTVAR, T(std::numeric_limits<CT>::infinity(), CT(0))};
-        var<T> nan{vartype::CONSTVAR, T(std::numeric_limits<CT>::quiet_NaN(), CT(0))};
-
-        calc.vars->insert("pi", pi);
-        calc.vars->insert("e", e);
-        calc.vars->insert("i", i);
-        calc.vars->insert("inf", inf);
-        calc.vars->insert("nan", nan);
+        calc.vars->insert("pi", T(std::acos(CT(-1)), CT(0)));
+        calc.vars->insert("e", T(std::exp(CT(1)), CT(0)));
+        calc.vars->insert("i", T(CT(0), CT(1)));
+        calc.vars->insert("inf", T(std::numeric_limits<CT>::infinity(), CT(0)));
+        calc.vars->insert("nan", T(std::numeric_limits<CT>::quiet_NaN(), CT(0)));
 
         return calc;
     }

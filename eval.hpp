@@ -21,8 +21,9 @@ namespace eval
         {
             std::map<CharType, tree_in> child;
             DataType *data;
-            tree_in() : data(nullptr) {}
-            ~tree_in() { delete data; }
+            bool isdelete;
+            tree_in() : data(nullptr),isdelete(false) {}
+            ~tree_in() { if(isdelete)delete data; }
         };
         using iterator = tree_in *;
 
@@ -49,7 +50,10 @@ namespace eval
         iterator getptr() { return ptr; }
         std::map<CharType, tree_in> &map() { return ptr->child; }
 
-        bool insert(const std::basic_string<CharType> &str, const DataType &data);
+        std::pair<bool,iterator> insert(const std::basic_string<CharType> &str, const DataType &data);
+        std::pair<bool,iterator> insert(const std::basic_string<CharType> &str, DataType *data);
+        bool reset(const std::basic_string<CharType> &str, const DataType &data);
+        bool reset(const std::basic_string<CharType> &str, DataType *data);
 
         iterator find(const CharType &ch)
         {
@@ -63,7 +67,7 @@ namespace eval
     };
 
     template <typename CharType, typename DataType>
-    bool sstree<CharType,DataType>::insert(const std::basic_string<CharType> &str, const DataType &data)
+    std::pair<bool,typename sstree<CharType,DataType>::iterator> sstree<CharType,DataType>::insert(const std::basic_string<CharType> &str, const DataType &data)
     {
         iterator ptr_l = &tree;
         typename std::map<CharType, tree_in>::iterator ptr_r;
@@ -84,10 +88,73 @@ namespace eval
             }
         }
         if (ptr_l->data)
-            return false;
+            return {false,ptr_l};
         ptr_l->data = new DataType(data);
+        ptr_l->isdelete = true;
+        return {true,ptr_l};
+    }
+
+    template <typename CharType, typename DataType>
+    std::pair<bool,typename sstree<CharType,DataType>::iterator> sstree<CharType,DataType>::insert(const std::basic_string<CharType> &str, DataType *data)
+    {
+        iterator ptr_l = &tree;
+        typename std::map<CharType, tree_in>::iterator ptr_r;
+        for (size_t pos = 0; pos < str.size(); pos++)
+        {
+            ptr_r = ptr_l->child.find(str[pos]);
+            if (ptr_r != ptr_l->child.end())
+            {
+                ptr_l = &(ptr_r->second);
+            }
+            else
+            {
+                do
+                {
+                    ptr_l = &(ptr_l->child[str[pos]]);
+                } while (++pos < str.size());
+                break;
+            }
+        }
+        if (ptr_l->data)
+            return {false,ptr_l};
+        ptr_l->data = data;
+        return {true,ptr_l};
+    }
+
+    template <typename CharType, typename DataType>
+    bool sstree<CharType,DataType>::reset(const std::basic_string<CharType> &str, const DataType &data)
+    {
+        auto ptr_l = search(str);
+        if(!ptr_l)
+            return false;
+        if(ptr_l->isdelete)
+            delete ptr_l->data;
+        else 
+            ptr_l->isdelete=true;
+
+        ptr_l->data=new DataType(data);
+
         return true;
     }
+
+    template <typename CharType, typename DataType>
+    bool sstree<CharType,DataType>::reset(const std::basic_string<CharType> &str, DataType *data)
+    {
+        auto ptr_l = search(str);
+        if(!ptr_l)
+            return false;
+        
+        if(ptr_l->isdelete)
+        {
+            delete ptr_l->data;
+            ptr_l->isdelete=false;
+        }
+
+        ptr_l->data=data;
+
+        return true;
+    }
+
     template <typename CharType, typename DataType>
     typename sstree<CharType,DataType>::iterator sstree<CharType,DataType>::search(const std::basic_string<CharType> &str)
     {
@@ -123,7 +190,11 @@ namespace eval
         }
         if (!ptr_l->child.empty())
         {
-            delete ptr_l->data;
+            if(ptr_l->isdelete)
+            {
+                delete ptr_l->data;
+                ptr_l->isdelete=false;
+            }
             ptr_l->data = nullptr;
         }
         else
@@ -144,13 +215,6 @@ namespace eval
     {
         CONSTVAR,
         FREEVAR
-    };
-
-    template <typename Type>
-    struct var
-    {
-        vartype vtype;
-        Type value;
     };
 
     template <typename Type>
@@ -176,7 +240,7 @@ namespace eval
 
         std::function<bool(const StringType &,size_t&,epre<DataType> &)> consts;
 
-        std::shared_ptr<sstree<CharType, var<DataType>>> vars;
+        std::shared_ptr<sstree<CharType, DataType>> vars;
         std::shared_ptr<sstree<CharType, func<DataType>>> funcs;
         std::shared_ptr<sstree<CharType, func<DataType>>> prefix_ops;
         std::shared_ptr<sstree<CharType, func<DataType>>> infix_ops;
@@ -184,12 +248,12 @@ namespace eval
 
         evaluator(
             std::function<bool(const StringType &,size_t&,epre<DataType> &)> consts_,
-            std::shared_ptr<sstree<CharType, var<DataType>>> vars_ = nullptr,
+            std::shared_ptr<sstree<CharType, DataType>> vars_ = nullptr,
             std::shared_ptr<sstree<CharType, func<DataType>>> funcs_ = nullptr,
             std::shared_ptr<sstree<CharType, func<DataType>>> pre_ops = nullptr,
             std::shared_ptr<sstree<CharType, func<DataType>>> in_ops = nullptr,
             std::shared_ptr<sstree<CharType, func<DataType>>> suf_ops = nullptr) : consts(consts_),
-                                                                                   vars(vars_ ? vars_ : std::make_shared<sstree<CharType, var<DataType>>>()),
+                                                                                   vars(vars_ ? vars_ : std::make_shared<sstree<CharType, DataType>>()),
                                                                                    funcs(funcs_ ? funcs_ : std::make_shared<sstree<CharType, func<DataType>>>()),
                                                                                    prefix_ops(pre_ops ? pre_ops : std::make_shared<sstree<CharType, func<DataType>>>()),
                                                                                    infix_ops(in_ops ? in_ops : std::make_shared<sstree<CharType, func<DataType>>>()),
@@ -271,7 +335,7 @@ namespace eval
                     funcs->rebegin();
                     pos = start; 
                 }
-                typename sstree<CharType, var<DataType>>::iterator var_it = vars->find(str[pos]);
+                typename sstree<CharType, DataType>::iterator var_it = vars->find(str[pos]);
                 if (var_it)
                 {
                     size_t start = pos;
@@ -285,7 +349,7 @@ namespace eval
 
                     if (vars->data())
                     {
-                        expr.vars.push_back(&vars->data()->value);
+                        expr.vars.push_back(vars->data());
                         expr.index += 'v';
                         expecting_operand = false;
                         vars->rebegin();
@@ -460,7 +524,7 @@ namespace eval
                     funcs->rebegin();
                     pos = start; 
                 }
-                typename sstree<CharType, var<DataType>>::iterator var_it = vars->find(str[pos]);
+                typename sstree<CharType, DataType>::iterator var_it = vars->find(str[pos]);
                 if (var_it)
                 {
                     size_t start = pos;
@@ -474,7 +538,7 @@ namespace eval
 
                     if (vars->data())
                     {
-                        expr.vars.push_back(&vars->data()->value);
+                        expr.vars.push_back(vars->data());
                         expr.index += 'v';
                         expecting_operand = false;
                         vars->rebegin();
@@ -591,11 +655,9 @@ namespace eval
                 auto &f = expr.funcs[func_idx++];
                 if (stack.size() < f->size)
                     throw std::runtime_error("Stack underflow");
-                std::vector<DataType> args(f->size);
-                for (size_t i = 0; i < f->size; ++i)
-                    args[i] = stack[stack.size() - f->size + i];
-                stack.resize(stack.size() - f->size);
-                stack.push_back(f->func_ptr(args.data()));
+                auto temp=f->func_ptr(stack.data() + stack.size() - f->size);
+                stack.resize(stack.size() - f->size+1);
+                stack.back()=temp;
                 break;
             }
             case 'v':

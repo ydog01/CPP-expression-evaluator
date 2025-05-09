@@ -7,20 +7,71 @@ namespace eval_init
 {
     template <typename T>
     T convert(const std::string &);
-    template <>
-    inline double convert<double>(const std::string &str)
-    {
-        return std::stod(str);
-    }
+    
     template <>
     inline float convert<float>(const std::string &str)
     {
         return std::stof(str);
     }
+
+    template <>
+    inline double convert<double>(const std::string &str)
+    {
+        return std::stod(str);
+    }
+
     template <>
     inline long double convert<long double>(const std::string &str)
     {
         return std::stold(str);
+    }
+
+    template <>
+    inline short convert<short>(const std::string &str)
+    {
+        return static_cast<short>(std::stoi(str));
+    }
+
+    template <>
+    inline int convert<int>(const std::string &str)
+    {
+        return std::stoi(str);
+    }
+
+    template <>
+    inline long convert<long>(const std::string &str)
+    {
+        return std::stol(str);
+    }
+
+    template <>
+    inline long long convert<long long>(const std::string &str)
+    {
+        return std::stoll(str);
+    }
+
+    template <>
+    inline unsigned short convert<unsigned short>(const std::string &str)
+    {
+        return static_cast<unsigned short>(std::stoul(str));
+    }
+
+    template <>
+    inline unsigned int convert<unsigned int>(const std::string &str)
+    {
+        return static_cast<unsigned int>(std::stoul(str));
+    }
+
+    template <>
+    inline unsigned long convert<unsigned long>(const std::string &str)
+    {
+        return std::stoul(str);
+    }
+
+    template <>
+    inline unsigned long long convert<unsigned long long>(const std::string &str)
+    {
+        return std::stoull(str);
     }
 
     template <typename T>
@@ -101,11 +152,11 @@ namespace eval_init
         func<T> tanh_op{1, size_max, [](const T *args)
                         { return std::tanh(args[0]); }};
         func<T> asinh_op{1, size_max, [](const T *args)
-                        { return std::asinh(args[0]); }};
+                         { return std::asinh(args[0]); }};
         func<T> acosh_op{1, size_max, [](const T *args)
-                        { return std::acosh(args[0]); }};
+                         { return std::acosh(args[0]); }};
         func<T> atanh_op{1, size_max, [](const T *args)
-                        { return std::atanh(args[0]); }};
+                         { return std::atanh(args[0]); }};
         func<T> log_op{2, size_max, [](const T *args)
                        { return std::log(args[1]) / std::log(args[0]); }};
         func<T> lg_op{1, size_max, [](const T *args)
@@ -185,15 +236,10 @@ namespace eval_init
         calc.funcs->insert("max", max_op);
 
         // 注册数学常量
-        var<T> pi{vartype::CONSTVAR, std::acos(T(-1))};
-        var<T> e{vartype::CONSTVAR, std::exp(T(1))};
-        var<T> inf{vartype::CONSTVAR, std::numeric_limits<T>::infinity()};
-        var<T> nan{vartype::CONSTVAR, std::numeric_limits<T>::quiet_NaN()};
-
-        calc.vars->insert("pi", pi);
-        calc.vars->insert("e", e);
-        calc.vars->insert("inf", inf);
-        calc.vars->insert("nan", nan);
+        calc.vars->insert("pi", std::acos(T(-1)));
+        calc.vars->insert("e", std::exp(T(1)));
+        calc.vars->insert("inf", std::numeric_limits<T>::infinity());
+        calc.vars->insert("nan", std::numeric_limits<T>::quiet_NaN());
 
         return calc;
     }

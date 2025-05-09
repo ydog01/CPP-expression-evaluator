@@ -1,300 +1,146 @@
-目录概述
-----------------------------
+<h2 id="概述">主要功能</h2>
 <table class="api-table">
-<tr><th>1. 功能特性</th></tr>
-
-<tr><th>2. 快速开始</th></tr>
-
-<tr><th>3. 核心类说明</th></tr>
-
-<tr><th>4. 表达式语法</th></tr>
-
-<tr><th>5. 自定义扩展</th></tr>
-
-<tr><th>6. 示例代码</th></tr>
-
-<tr><th>7. 注意事项</th></tr>
-
-<tr><th>8. 错误处理</th></tr>
-
-<tr><th>9. 性能考虑</th></tr>
+  <tr><th>1. 基本算术运算</th></tr>
+  <tr><th>2. 自定义函数</th></tr>
+  <tr><th>3. 变量系统</th></tr>
+  <tr><th>4. 运算符优先级</th></tr>
+  <tr><th>5. 前缀/中缀/后缀运算符</th></tr>
+  <tr><th>6. 常量定义</th></tr>
+  <tr><th>7. 复数运算</th></tr>
+  <tr><th>8. LaTeX解析</th></tr>
 </table>
 
-----------------------------
+<h2 id="功能特性">功能特性</h2>
+<ul>
+  <li><strong>核心特性</strong>：
+    <ul>
+      <li>支持自定义类型：运行自己编写规则</li>
+      <li>支持实数类型：float/double/long double</li>
+      <li>复数运算支持：std::complex&lt;T&gt;</li>
+      <li>LaTeX数学表达式解析为计算表达式</li>
+      <li>动态符号管理：前缀树存储变量、函数和运算符</li>
+      <li>运算符优先级自动处理</li>
+    </ul>
+  </li>
+  <li><strong>扩展能力</strong>：
+    <ul>
+      <li>自定义函数、运算符和变量</li>
+      <li>自由变量与托管变量分离管理</li>
+      <li>支持多参数函数（如atan2, log）</li>
+    </ul>
+  </li>
+</ul>
 
-<a id="概述"></a>概述
-----------------------------
-本库是一个***C++模板化的表达式求值引擎***，提供了> ~~强大的~~ **数学表达式解析和计算功能**。
-<br>**它支持：**
-
-<table class="api-table">
-<tr><th>1. 基本算术运算</th></tr>
-
-<tr><th>2. 自定义函数</th></tr>
-
-<tr><th>3. 变量系统</th></tr>
-
-<tr><th>4. 运算符优先级</th></tr>
-
-<tr><th>5. 前缀/中缀/后缀运算符</th></tr>
-
-<tr><th>6. 常量定义</th></tr>
-</table>
-
-**库采用头文件方式实现，无需额外编译**，只需包含**eval.hpp**和**eval_init_complex.hpp** (如果需要默认复数初始化)/**eval_init.hpp** (如果需要默认实数初始化)即可使用。
-
-----------------------------
-
-<a id="功能特性"></a>功能特性
-----------------------------
-**多种数据类型**：支持**float、double、long double等类型**，甚至是 ***自定义类型*** 比如**自定义高精度**这些
-
-**变量支持**：支持动态定义**变量**和**常量**
-
-**默认运算符与函数**: 如果你需要的是 ***实数类型*** 或者 ***复数类型***  ，则可以直接 ***通过模板创建支持大量函数/运算符的解析器***
-
-**自定义运算符**：可扩展前缀、中缀和后缀运算符
-
-**错误处理**：提供基本的语法错误检测
-
-使用 ***前缀树（Trie）*** 高效存储和查找符号
-
-支持**运算符优先级**
-
-***轻量级*** 实现，仅依赖 ***STL***
-
-----------------------------
-
-<a id="快速开始"></a>快速开始
-----------------------------
-**基本使用**
-```
-#include "eval_init.hpp"
-
+<h2 id="快速开始">快速开始</h2>
+<h3>实数计算示例</h3>
+<pre><code class="language-cpp">#include "eval_init.hpp"
 int main() 
 {
-    // 创建double类型的计算器实例
-    auto calc = eval_init::create_real_eval<double>();
-	
-    // 解析表达式
-    auto expr = calc.parse("2 + 3 * sin(pi/2)");
-    
-    // 计算表达式
-    double result = calc.evaluate(expr);
-    
-    return 0;
-}
-```
+  auto calc = eval_init::create_real_eval&lt;double&gt;();
+  auto expr = calc.parse("64 + sqrt(16) * sin(pi/2)");
+  double result = calc.evaluate(expr); // 结果：64 + 4*1 = 68
+}</code></pre>
 
-----------------------------
-
-<a id="核心类说明"></a>核心类说明
-----------------------------
-
-evaluator<CharType, DataType>:
-
-表达式求值器核心类，负责解析和计算表达式。
-
-----------------------------
-
-主要方法
-----------------------------
-<table class="api-table"> <tr> <th>方法</th> <th>描述</th> </tr> <tr> <td><code>parse</code></td> <td>解析表达式字符串</td> </tr> <tr> <td><code>evaluate</code></td> <td>计算已解析的表达式</td> </tr> </table>
-
-----------------------------
-epre<DataType>
-为表达式中间结构，存储解析后的表达式信息。
-
-成员变量
-
-funcs: 函数/运算符列表
-
-vars: 变量引用列表
-
-consts: 常量值列表
-
-index: 表达式元素索引序列
-
-----------------------------
-sstree<CharType, DataType>:
-
-前缀树（Trie）实现，用于高效存储和查找符号（变量、函数、运算符）。
-
-主要方法
-<table class="api-table"> <tr> <th>方法</th> <th>描述</th> </tr> <tr> <td><code>insert</code></td> <td>插入键值对</td> </tr> <tr> <td><code>find</code></td> <td>查找单个字符对应的节点</td> </tr> <tr> <td><code>search</code></td> <td>查找字符串对应的节点</td> </tr> <tr> <td><code>erase</code></td> <td>删除键值对</td> </tr> </table>
-
-----------------------------
-
-<a id="表达式语法"></a>表达式语法
-----------------------------
-实数类型可默认支持的运算符
-<table class="api-table">
-<tr><th>运算符</th><th>描述</th><th>优先级</th></tr>
-<tr><th>+</th>	<th>加法</th>	<th>1</th></tr>
-<tr><th>-</th>	<th>减法</th>	<th>1</th></tr>
-<tr><th>*</th>	<th>乘法</th>	<th>2</th></tr>
-<tr><th>/</th>	<th>除法</th>	<th>2</th></tr>
-<tr><th>%</th>	<th>取模</th>	<th>2</th></tr>
-<tr><th>^</th>	<th>幂运算</th>	<th>3</th></tr>
-<tr><th>-</th>	<th>负号(前缀)</th>	<th>2</th></tr>
-</table>
-可默认内置函数/常量
-
-```
-三角函数: sin, cos, tan, asin, acos, atan
-
-双曲函数: sinh, cosh, tanh
-
-对数函数: log, lg, ln, log2
-
-内置常量
-pi: π值
-
-e: 自然对数的底
-```
-
-表达式示例
-```
-"2 + 3 * 4"           // 基本算术
-"sin(pi/2) + cos(0)"  // 函数调用
-"-3^2"                // 幂运算与负号
-"log(2, 8)"           // 对数函数
-"e^(ln(5))"           // 自然对数和指数
-```
-
-----------------------------
-
-<a id="自定义扩展"></a>自定义扩展
-----------------------------
-**先创建解析器**
-
-```
-auto calc = eval_init::create_real_eval<double>();
-```
-**添加自定义函数**
-```
-
-// 定义自定义函数
-eval::func<double> sqrt_op
-{
-    1, 
-    eval::size_max,  // 最高优先级
-    [](const double *args) { return sqrt(args[0]); }
-};
-
-// 注册函数
-calc.funcs->insert("sqrt", sqrt_op);
-```
-
-**添加自定义变量**
-```
-// 定义变量
-eval::var<double> my_var
-{
-    eval::vartype::FREEVAR,  // 可变量
-    42.0                     // 初始值
-};
-
-// 注册变量
-calc.vars->insert("my_var", my_var);
-```
-
-**添加自定义运算符**
-```
-// 定义阶乘后缀运算符
-eval::func<double> fact_op
-{
-    1, 
-    eval::size_max,  // 最高优先级
-    [](const double *args) 
-    { 
-        double result = 1;
-        for (int i = 2; i <= args[0]; ++i)
-            result *= i;
-        return result;
-    }
-};
-
-// 注册为后缀运算符
-calc.suffix_ops->insert("!", fact_op);
-```
-
-----------------------------
-
-<a id="示例代码"></a>示例代码
-----------------------------
-**基本计算示例**
-```
-#include <iostream>
-#include "eval_init.hpp"
-
+<h3>复数计算示例</h3>
+<pre><code class="language-cpp">#include "eval_init_complex.hpp"
 int main() 
 {
-    auto calc = eval_init::create_real_eval<double>();
-    eval::epre<double> expr;
-    
-    // 解析并计算简单表达式
-    calc.parse_expression(expr, "3 + 4 * 2 / (1 - 5)^2");
-    std::cout << "Result: " << calc.evaluate(expr) << std::endl;
-    
-    return 0;
-}
-使用变量示例
-cpp
-auto calc = eval_init::create_real_eval<double>();
+  auto c_calc = eval_init::create_complex_eval&lt;double&gt;();
+  c_calc.vars->insert("z", std::complex&lt;double&gt;(1, 2));
+  auto expr = c_calc.parse("z * e^(i*pi) + conj(3+4i)");
+  auto result = c_calc.evaluate(expr); // 结果：(-1-2i) + (3-4i) = 2-6i
+}</code></pre>
 
-// 添加变量
-eval::var<double> x{eval::vartype::FREEVAR, 5.0};
-calc.vars->insert("x", x);
-
-eval::epre<double> expr;
-calc.parse_expression(expr, "2*x + 3");
-std::cout << "Result: " << calc.evaluate(expr) << std::endl;  // 输出13
-自定义函数示例
-cpp
-auto calc = eval_init::create_real_eval<double>();
-
-// 添加自定义max函数
-eval::func<double> max_op
+<h3>LaTeX解析示例</h3>
+<pre><code class="language-cpp">#include "eval_latex.hpp"
+int main() 
 {
-    2, 
-    eval_init::size_max,
-    [](const double *args) { return std::max(args[0], args[1]); }
+  eval::latex_parser&lt;char&gt; parser;
+  parser.register_variable("x");
+  std::string expr = parser.parse("\frac{\sqrt[3]{x}}{2^{n}}");
+  // 输出：root(3,x)/(2^(n))
+}</code></pre>
+
+<h2 id="核心类说明">核心类说明</h2>
+<table class="api-table">
+  <tr><th>类名</th><th>功能</th><th>关键成员</th></tr>
+  <tr><td>sstree&lt;C,T&gt;</td><td>前缀树符号表</td><td><code>insert()</code>, <code>search()</code>, <code>erase()</code></td></tr>
+  <tr><td>evaluator&lt;C,T&gt;</td><td>表达式解析器</td><td><code>parse()</code>, <code>evaluate()</code></td></tr>
+  <tr><td>epre&lt;T&gt;</td><td>表达式中间表示</td><td><code>funcs</code>, <code>vars</code>, <code>index</code></td></tr>
+  <tr><td>latex_parser&lt;C&gt;</td><td>LaTeX转换器</td><td><code>parse()</code>, <code>register_variable()</code></td></tr>
+</table>
+
+<h2 id="表达式语法">表达式语法</h2>
+<table class="api-table">
+  <tr><th>类别</th><th>语法示例</th><th>说明</th></tr>
+  <tr><td>基本运算</td><td><code>3 + 5 * (2 - x)</code></td><td>支持嵌套括号</td></tr>
+  <tr><td>函数调用</td><td><code>sin(pi/2)</code></td><td>必须使用括号</td></tr>
+  <tr><td>复数运算</td><td><code>(2+3i) * 4i</code></td><td>虚数单位用<code>i</code>后缀</td></tr>
+  <tr><td>LaTeX转换</td><td><code>\sqrt{\frac{x}{2}}</code> → <code>sqrt(x/2)</code></td><td>支持分式、根号等</td></tr>
+</table>
+
+<h2 id="自定义扩展">自定义扩展</h2>
+<h3>1. 添加自定义函数</h3>
+<pre><code class="language-cpp">eval::func&lt;double&gt; custom_op
+{
+  2,              // 参数个数
+  eval::size_max, // 最高优先级
+  [](const double* args) { return args[0] + std::exp(args[1]); }
 };
-calc.funcs->insert("max", max_op);
+calc.funcs->insert("custom", custom_op);</code></pre>
 
-eval::epre<double> expr;
-calc.parse_expression(expr, "max(3, 7)");
-std::cout << "Result: " << calc.evaluate(expr) << std::endl;  // 输出7
-```
+<h3>2. 注册变量</h3>
+<pre><code class="language-cpp">// 托管变量（值存储）
+calc.vars->insert("PI", 3.1415926);
 
-----------------------------
+// 自由变量（指针绑定）
+double x = 2.0;
+calc.vars->insert("x", &x);</code></pre>
 
-<a id="注意事项"></a>注意事项
-----------------------------
-<div class="warning"> <strong>重要提示：</strong> <ul> <li>表达式字符串编码可以根据需要自行调整模板</li> <li>变量和函数名区分大小写</li> <li>函数调用必须使用括号，即使没有参数</li> <li>负号和减号使用相同符号，根据上下文自动识别</li> </ul> </div>
+<h2 id="错误处理">错误处理</h2>
+<div class="warning">
+  <ul>
+    <li><strong>语法错误</strong>：未闭合括号时抛出<code>size_t</code>指明错误下标</li>
+    <li><strong>符号未定义</strong>：未注册变量返回<code>nullptr</code></li>
+    <li><strong>运算错误</strong>：抛出std::runtime_error指明错误原因</li>
+  </ul>
+</div>
+<pre><code class="language-cpp">try 
+{ 
+  auto expr = calc.parse("2 + * 3");
+} 
+catch (const std::runtime_error& e) 
+{ 
+  std::cerr << "解析错误: " << e.what(); 
+}</code></pre>
 
-----------------------------
+<h2 id="性能考虑">性能优化建议</h2>
+<div class="note">
+  <ul>
+    <li><strong>表达式重用</strong>：多次计算时保留<code>epre</code>对象</li>
+  </ul>
+</div>
+<pre><code class="language-cpp">// 预编译表达式
+auto expr = calc.parse("x^2 + y^2"); 
+for (int i=0; i&lt;1000; i++) 
+{ 
+  x = i; 
+  y = i+1; 
+  double result = calc.evaluate(expr); // 避免重复解析 
+}</code></pre>
 
-错误处理
-----------------------------
-语法错误时（如未定义的变量或函数），parse会抛出错误位置
+<h2 id="注意事项">关键注意事项</h2>
+<div class="warning">
+  <ul>
+    <li>LaTeX解析时，多字母变量（如<code>theta</code>）需提前注册</li>
+    <li>函数参数分隔符必须使用英文逗号</li>
+  </ul>
+</div>
 
-计算错误（如除以零，函数调用错误时）时,evaluate会抛出std::runtime_error
-
-----------------------------
-
-<a id="性能考虑"></a>性能考虑
-----------------------------
-解析性能：解析阶段使用前缀树查找符号，效率较高
-
-计算性能：计算阶段使用栈式求值，性能接近手写代码
-
-内存使用：epre结构会存储所有中间结果，复杂表达式可能占用较多内存
-
-<div class="note"> <strong>优化建议：</strong> 对于需要重复计算的表达式，可以解析一次后保存<code>epre</code>结构，然后多次调用<code>evaluate</code>。 </div>
-
-----------------------------
-作者QQ number:1917927623
-
-欢迎加个好友哇！
+<h2 id="高级特性">高级特性示例</h2>
+<h3>自定义运算符优先级</h3>
+<pre><code class="language-cpp">eval::func&lt;double&gt; mod_op{
+  2, 4, 
+  [](auto args) { return f(args[0], args[1]); }
+};
+calc.infix_ops->insert("&", mod_op); // 设置运算优先级为4的中缀运算符</code></pre>
