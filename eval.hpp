@@ -262,6 +262,7 @@ namespace eval
         epre<DataType> parse(const StringType &str);
         size_t parse(epre<DataType> &expr, const StringType &str) noexcept;
         DataType evaluate(const epre<DataType> &expr);
+        typename sstree<CharType, func<DataType>>::iterator insert_function(const StringType&str,const std::vector<StringType>&vars,const StringType&context);
     };
     template <typename CharType, typename DataType>
     size_t evaluator<CharType,DataType>::parse(epre<DataType> &expr, const StringType &str) noexcept
@@ -566,6 +567,14 @@ namespace eval
                 }
                 if (str[pos] == ',')
                 {
+                    while (!op_stack.empty() && op_stack.back() != nullptr)
+                    {
+                        expr.funcs.push_back(op_stack.back());
+                        expr.index += 'f';
+                        op_stack.pop_back();
+                    }
+                    if(op_stack.empty())
+                        throw pos;
                     pos++;
                     expecting_operand = true;
                     continue;
@@ -673,6 +682,80 @@ namespace eval
         if (stack.size() != 1)
             throw std::runtime_error("Malformed expression");
         return stack.back();
+    }
+    template <typename CharType, typename DataType>
+    typename sstree<CharType, func<DataType>>::iterator evaluator<CharType,DataType>::insert_function(const StringType&str,const std::vector<StringType>&vars_temp,const StringType&context)
+    {
+        struct VarInsertResult
+        {
+            bool inserted;                                      
+            typename sstree<CharType, DataType>::iterator node; 
+            DataType *old_data;                                 
+        };
+
+        std::vector<VarInsertResult> var_results(vars_temp.size());
+        auto vars_tmpv = std::make_shared<std::vector<DataType>>(vars_temp.size());
+
+        for (size_t pos = 0; pos < vars_temp.size(); ++pos)
+        {
+            const auto &var_name = vars_temp[pos];
+            auto &tmp_value = (*vars_tmpv)[pos];
+
+            auto insert_result = vars->insert(var_name, &tmp_value);
+            var_results[pos].inserted = insert_result.first;
+            var_results[pos].node = insert_result.second;
+
+            if (!insert_result.first)
+            {
+                var_results[pos].old_data = var_results[pos].node->data;
+                var_results[pos].node->data = &tmp_value;
+            }
+        }
+
+        epre<DataType> expr;
+        bool sign=false;
+        size_t pos;
+        try
+        {
+            expr = this->parse(context);
+        }
+        catch (size_t tpos)
+        {
+            sign=true;
+            pos=tpos;
+            throw;
+        }
+
+        for (auto &res : var_results)
+        {
+            if (!res.inserted)
+                res.node->data = res.old_data;
+            else
+                vars->erase(vars_temp[&res - &var_results[0]]);
+        }
+
+        if(sign)
+            throw pos;
+
+        std::unique_ptr<func<DataType>> f(new func<DataType>());
+        f->size = vars_temp.size();
+        f->priority = size_max; 
+
+        f->func_ptr = [vars_tmpv, expr, this](const DataType *args) -> DataType
+        {
+            for (size_t i = 0; i < vars_tmpv->size(); ++i)
+                (*vars_tmpv)[i] = args[i];
+            return this->evaluate(expr);
+        };
+
+        auto insert_result = funcs->insert(str, f.get());
+        if (!insert_result.first)
+            throw std::runtime_error("Function already exists: " + std::string(str.begin(), str.end()));
+
+        insert_result.second->isdelete = true;
+        f.release();
+
+        return insert_result.second;
     }
 }
 
